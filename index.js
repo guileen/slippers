@@ -6,18 +6,10 @@
  * close block in a single line without expression. e.g. `foo.bar();}` is wrong
  * close ONE block in ONE line, e.g. ` });});` is wrong , `}}` is wrong.
  */
-
-/*
- ^\s*
- ((var )?([^=]*)=)?     // var err, data =
- (.*\()                 // foo().readAsync(
- ([^\)]*)               // filename, options
- (\)\s*;?)              // )
- \s*\/\/\{\s*$/         // //{
-*/
-var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)(\s*\)\s*;?)\s*\/\/\{/,
-    ex_fn     =  /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)(\s*\)\s*\{)\s*\/\/\{/,
-    ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
+var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)\b_\b\s*\);?(.*)/,
+    ex_fn     = /^(.*[\(\s=:&|]?function(?:\s[^\(]*|)\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
+    ex_nor_fn = /^.*[\(\s=:&|]?function(?:\s[^\(]*|)\(\s*[^\)]*\)\s*\{.*/,
+    ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(.*)/;
 
 function getDeltaBlocks(line){
   var close=false,levels = 0;
@@ -56,15 +48,16 @@ function compile(codes){
           cb_args = m[4],
           foo = m[5],
           args = m[6],
-          cb = ( args && ',' ) + ' function(__err' + (assignment && ',' || ''),
+          tail = m[7],
+          cb = 'function(__err' + (assignment && ', ' || ''),
           errHandler = '){if(__err)return __cb(__err);';
 
       if(assignment){
         if(local){
-          cb += cb_args;
+          cb += cb_args.trim();
           cb += errHandler;
         } else {
-          cb += cb_args.replace(/[^\s,]+/g, '__$&');
+          cb += cb_args.replace(/[^\s,]+/g, '__$&').trim();
           cb += errHandler;
           cb += cb_args.replace(/[^\s,]+/g, '$&=__$&');
           cb += ';';
@@ -72,7 +65,7 @@ function compile(codes){
       }else{
         cb += errHandler;
       }
-      results.push( indent + foo + args + cb);
+      results.push( indent + foo + args + cb + tail);
     }
     return !!m;
   }
@@ -83,6 +76,7 @@ function compile(codes){
       while(blocks[last_block_level].level-- > 0) close += '});';
       // only 1 block will be fully closed. so don't put 2 close } in 1 line.
       blocks[last_block_level].level = 0;
+      if(deltaBlocks[1] < 0) blocks[last_block_level] = null;
       line = line.replace(/^\s*/, '$&' + close);
     }
     if(block.level > 0 && /\/\/\s*}/.test(line)){
@@ -95,23 +89,27 @@ function compile(codes){
   function parse_fn(){
     var m = ex_fn.exec(line);
     if(m){
+      block.in_async = true;
       var prefix = m[1],
-          args = m[2],
+          args = m[2].trim(),
           suffix = m[3];
-      results.push( prefix + args + (args && ',') + '__cb' + suffix);
+      results.push(prefix + args + (args && ' ') + '__cb' + suffix);
+    } else if(ex_nor_fn.test(line)){
+      block.in_async = false;
     }
     return !!m;
   }
 
   function parse_return(){
     var m = ex_return.exec(line);
-    if(m){
+    if(m && block.in_async){
       var prefix = m[1],
           cb_args = m[2],
           suffix = m[3];
-      results.push( (prefix || '') + '__cb(null' + (cb_args && ',') + cb_args + ')' + suffix);
+      results.push((prefix || '') + '__cb(null' + (cb_args && ',') + cb_args + ')' + suffix);
+      return true;
     }
-    return !!m;
+    return false;
   }
 
   for(; i< len; i++){
@@ -121,10 +119,11 @@ function compile(codes){
 
     block_level += deltaBlocks[1];
     block = blocks[block_level] || (blocks[block_level] = {
-        level: 0
+        level: 0,
+        in_async: (blocks[last_block_level] && blocks[last_block_level].in_async)
     });
 
-    parse_async() || parse_fn() || parse_return() || parse_default();
+    parse_fn() || parse_async() || parse_return() || parse_default();
 
   }
   results[0] = 'var __cb=global.__cb || function(e){console.log(e)};' + results[0];

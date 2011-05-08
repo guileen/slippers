@@ -3,29 +3,32 @@ var mongo = require('mongodb')
 
 db = mongo.db('...');
 
-db.open();//{
+db.open(_);
 
-function getBooks(options){//{
-  var book = db.collection('book');//{
-  var cursor = book.find();//{
-  var books = cursor.toArray();//{
+function getBooks(options, _){
+  var book = db.collection('book', _);
+  var cursor = book.find(_);
+  var books = cursor.toArray(_);
   doSomething(books);
-  return books;//{
+  return books;
 }
 
-function multiLevels(){//{
+var multiLevels = function(_){
   var data, books;
   if(yes){
-    data = fs.readFile('filename', 'utf-8');//{
+    data = fs.readFile('filename', 'utf-8', _);
     if(ok){
-      books = db.collection('book');//{
-      return books;//{
+      books = db.collection('book', _);
+      return books;
     }
   }else{
-    data = fs.readFile('filename', 'utf-8');//{
+    var testInner = (function(){
+        return 0;
+    })();
+    data = fs.readFile('filename', 'utf-8', _);
     if(ok){
-      books = db.collection('book');//{
-      return books;//{
+      books = db.collection('book', _);
+      return books;
     }
   }
   return books;//this is wrong, out of indent;
