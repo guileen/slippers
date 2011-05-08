@@ -9,6 +9,11 @@ please try [streamlinejs](https://github.com/Sage/streamlinejs) or [Jscex](https
 
 You just need end with a `//{` on the async call, you can got the magic.
 
+Usage
+========
+
+run `npm install slippers`
+
 edit test.js
 
 ```javascript
