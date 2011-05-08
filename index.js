@@ -6,17 +6,8 @@
  * close block in a single line without expression. e.g. `foo.bar();}` is wrong
  * close ONE block in ONE line, e.g. ` });});` is wrong , `}}` is wrong.
  */
-
-/*
- ^\s*
- ((var )?([^=]*)=)?     // var err, data =
- (.*\()                 // foo().readAsync(
- ([^\)]*)               // filename, options
- (\)\s*;?)              // )
- \s*\/\/\{\s*$/         // //{
-*/
 var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)\b_\b\s*\);?(.*)/,
-    ex_fn     =  /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
+    ex_fn     = /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
     ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
 
 function getDeltaBlocks(line){
@@ -99,7 +90,7 @@ function compile(codes){
       var prefix = m[1],
           args = m[2].trim(),
           suffix = m[3];
-      results.push( prefix + args + (args && ' ') + '__cb' + suffix);
+      results.push(prefix + args + (args && ' ') + '__cb' + suffix);
     }
     return !!m;
   }
@@ -110,7 +101,7 @@ function compile(codes){
       var prefix = m[1],
           cb_args = m[2],
           suffix = m[3];
-      results.push( (prefix || '') + '__cb(null' + (cb_args && ',') + cb_args + ')' + suffix);
+      results.push((prefix || '') + '__cb(null' + (cb_args && ',') + cb_args + ')' + suffix);
     }
     return !!m;
   }
