@@ -13,7 +13,7 @@ function getBooks(options, __cb){
   __cb(null,books);
 });});});}
 
-function multiLevels(__cb){
+var multiLevels = function(__cb){
   var data, books;
   if(yes){
     fs.readFile('filename', 'utf-8', function(__err, __data){if(__err)return __cb(__err);data=__data ;

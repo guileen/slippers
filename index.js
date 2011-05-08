@@ -7,7 +7,7 @@
  * close ONE block in ONE line, e.g. ` });});` is wrong , `}}` is wrong.
  */
 var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)\b_\b\s*\);?(.*)/,
-    ex_fn     = /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
+    ex_fn     = /^(.*[\s=:&|]?function(?:\s[^\(]*|)\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
     ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
 
 function getDeltaBlocks(line){

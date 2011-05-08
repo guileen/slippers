@@ -13,7 +13,7 @@ function getBooks(options, _){
   return books;//{
 }
 
-function multiLevels(_){
+var multiLevels = function(_){
   var data, books;
   if(yes){
     data = fs.readFile('filename', 'utf-8', _);
