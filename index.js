@@ -15,9 +15,11 @@
  (\)\s*;?)              // )
  \s*\/\/\{\s*$/         // //{
 */
-var ex = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)(\s*\)\s*;?)\s*\/\/\{/
+var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)(\s*\)\s*;?)\s*\/\/\{/,
+    ex_fn     =  /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)(\s*\)\s*\{)\s*\/\/\{/,
+    ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
 
-function getBlocks(line){
+function getDeltaBlocks(line){
   var close=false,levels = 0;
   //remove line comment and escape
   line = line.replace(/(\/\/.*|\\.)/g,'');
@@ -39,58 +41,93 @@ function compile(codes){
   var lines = codes.replace('\r\n', '\n').split('\n'),
       len=lines.length,
       i=0,
-      levels = [],
-      block = 0,
-      results = [];
+      blocks = [],
+      block_level = 0,
+      results = [],
+      line, deltaBlocks, block_level, last_block_level, block;
 
-  for(; i< len; i++){
-    var line = lines[i],
-        deltaBlocks = getBlocks(line),
-        last_block = block,
-        m = ex.exec(line);
-
-    block += deltaBlocks[1];
-
+  function parse_async(){
+    var m = ex_async.exec(line);
     if(m){
-      levels[block] = (levels[block]||0) + 1;
+      ++block.level;
       var indent = m[1],
           assignment = m[2],
           local = m[3],
           cb_args = m[4],
           foo = m[5],
           args = m[6],
-          cb = ( args && ',' ) + ' function(';
+          cb = ( args && ',' ) + ' function(__err' + (assignment && ',' || ''),
+          errHandler = '){if(__err)return __cb(__err);';
 
       if(assignment){
         if(local){
           cb += cb_args;
-          cb += '){';
+          cb += errHandler;
         } else {
           cb += cb_args.replace(/[^\s,]+/g, '__$&');
-          cb += '){';
+          cb += errHandler;
           cb += cb_args.replace(/[^\s,]+/g, '$&=__$&');
           cb += ';';
         }
       }else{
-        cb +='){';
+        cb += errHandler;
       }
       results.push( indent + foo + args + cb);
     }
-    else{
-      if(deltaBlocks[0] || i == len-1){
-        var close = ''
-        while(levels[last_block]-- > 0) close += '});';
-        // only 1 block will be fully closed. so don't put 2 close } in 1 line.
-        levels[last_block] = 0;
-        line = close + line;
-      }
-      if(levels[block] > 0 && /\/\/\s*}/.test(line)){
-        line = '});' + line;
-        levels[block]--;
-      }
-      results.push(line);
-    }
+    return !!m;
   }
+
+  function parse_default(){
+    if(deltaBlocks[0] || i == len-1){
+      var close = ''
+      while(blocks[last_block_level].level-- > 0) close += '});';
+      // only 1 block will be fully closed. so don't put 2 close } in 1 line.
+      blocks[last_block_level].level = 0;
+      line = line.replace(/^\s*/, '$&' + close);
+    }
+    if(block.level > 0 && /\/\/\s*}/.test(line)){
+      line = line.replace(/^\s*/,'$&'+'});');
+      block.level--;
+    }
+    results.push(line);
+  }
+
+  function parse_fn(){
+    var m = ex_fn.exec(line);
+    if(m){
+      var prefix = m[1],
+          args = m[2],
+          suffix = m[3];
+      results.push( prefix + args + (args && ',') + '__cb' + suffix);
+    }
+    return !!m;
+  }
+
+  function parse_return(){
+    var m = ex_return.exec(line);
+    if(m){
+      var prefix = m[1],
+          cb_args = m[2],
+          suffix = m[3];
+      results.push( (prefix || '') + '__cb(null' + (cb_args && ',') + cb_args + ')' + suffix);
+    }
+    return !!m;
+  }
+
+  for(; i< len; i++){
+    line = lines[i];
+    deltaBlocks = getDeltaBlocks(line);
+    last_block_level = block_level;
+
+    block_level += deltaBlocks[1];
+    block = blocks[block_level] || (blocks[block_level] = {
+        level: 0
+    });
+
+    parse_async() || parse_fn() || parse_return() || parse_default();
+
+  }
+  results[0] = 'var __cb=global.__cb || function(e){console.log(e)};' + results[0];
   return results.join('\n');
 }
 
