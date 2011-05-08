@@ -127,6 +127,7 @@ function compile(codes){
     parse_async() || parse_fn() || parse_return() || parse_default();
 
   }
+  results[0] = 'var __cb=global.__cb || function(e){console.log(e)};' + results[0];
   return results.join('\n');
 }
 
