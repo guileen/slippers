@@ -16,7 +16,7 @@
  \s*\/\/\{\s*$/         // //{
 */
 var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)\b_\b\s*\);?(.*)/,
-    ex_fn     =  /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)(\s*\)\s*\{)\s*\/\/\{/,
+    ex_fn     =  /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
     ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
 
 function getDeltaBlocks(line){
@@ -97,9 +97,9 @@ function compile(codes){
     var m = ex_fn.exec(line);
     if(m){
       var prefix = m[1],
-          args = m[2],
+          args = m[2].trim(),
           suffix = m[3];
-      results.push( prefix + args + (args && ',') + '__cb' + suffix);
+      results.push( prefix + args + (args && ' ') + '__cb' + suffix);
     }
     return !!m;
   }
@@ -125,7 +125,7 @@ function compile(codes){
         level: 0
     });
 
-    parse_async() || parse_fn() || parse_return() || parse_default();
+    parse_fn() || parse_async() || parse_return() || parse_default();
 
   }
   results[0] = 'var __cb=global.__cb || function(e){console.log(e)};' + results[0];

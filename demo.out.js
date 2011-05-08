@@ -5,7 +5,7 @@ db = mongo.db('...');
 
 db.open(function(__err){if(__err)return __cb(__err);
 
-function getBooks(options,__cb){
+function getBooks(options, __cb){
   db.collection('book', function(__err, book){if(__err)return __cb(__err);
   book.find(function(__err, cursor){if(__err)return __cb(__err);
   cursor.toArray(function(__err, books){if(__err)return __cb(__err);

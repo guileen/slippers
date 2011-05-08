@@ -5,7 +5,7 @@ db = mongo.db('...');
 
 db.open(_);
 
-function getBooks(options){//{
+function getBooks(options, _){
   var book = db.collection('book', _);
   var cursor = book.find(_);
   var books = cursor.toArray(_);
@@ -13,7 +13,7 @@ function getBooks(options){//{
   return books;//{
 }
 
-function multiLevels(){//{
+function multiLevels(_){
   var data, books;
   if(yes){
     data = fs.readFile('filename', 'utf-8', _);
