@@ -36,7 +36,6 @@ function compile(codes){
       blocks = [],
       block_level = 0,
       results = [],
-      in_async = true,
       line, deltaBlocks, block_level, last_block_level, block;
 
   function parse_async(){
@@ -77,6 +76,7 @@ function compile(codes){
       while(blocks[last_block_level].level-- > 0) close += '});';
       // only 1 block will be fully closed. so don't put 2 close } in 1 line.
       blocks[last_block_level].level = 0;
+      if(deltaBlocks[1] < 0) blocks[last_block_level] = null;
       line = line.replace(/^\s*/, '$&' + close);
     }
     if(block.level > 0 && /\/\/\s*}/.test(line)){
@@ -89,20 +89,20 @@ function compile(codes){
   function parse_fn(){
     var m = ex_fn.exec(line);
     if(m){
-      in_async = true;
+      block.in_async = true;
       var prefix = m[1],
           args = m[2].trim(),
           suffix = m[3];
       results.push(prefix + args + (args && ' ') + '__cb' + suffix);
     } else if(ex_nor_fn.test(line)){
-      in_async = false;
+      block.in_async = false;
     }
     return !!m;
   }
 
   function parse_return(){
     var m = ex_return.exec(line);
-    if(m && in_async){
+    if(m && block.in_async){
       var prefix = m[1],
           cb_args = m[2],
           suffix = m[3];
@@ -119,7 +119,8 @@ function compile(codes){
 
     block_level += deltaBlocks[1];
     block = blocks[block_level] || (blocks[block_level] = {
-        level: 0
+        level: 0,
+        in_async: (blocks[last_block_level] && blocks[last_block_level].in_async)
     });
 
     parse_fn() || parse_async() || parse_return() || parse_default();

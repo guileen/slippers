@@ -28,10 +28,10 @@ var multiLevels = function(__cb){
     fs.readFile('filename', 'utf-8', function(__err, __data){if(__err)return __cb(__err);data=__data ;
     if(ok){
       db.collection('book', function(__err, __books){if(__err)return __cb(__err);books=__books ;
-      return books;
+      __cb(null,books);
     });}
   });}
-  return books;//this is wrong, out of indent;
+  __cb(null,books);//this is wrong, out of indent;
 }
 
 console.log('inside open');
