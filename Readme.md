@@ -1,7 +1,7 @@
 Slippers
 ========
 
-Nodejs with slippers, confortable like wearing slippers, but INFORMAL, JUST FOR FUN.
+Nodejs with slippers, confortable like wearing slippers, but INFORMAL, **JUST FOR FUN**.
 
 Slippers is inspired by [streamlinejs](https://github.com/Sage/streamlinejs) and [Jscex](https://github.com/JeffreyZhao/jscex).
 If you really need this feature,
@@ -45,5 +45,5 @@ Note
   * close block in a single line without expression. e.g. `foo.bar();}` is wrong
   * close ONE block in ONE line, e.g. ` });});` is wrong , `}}` is wrong.
 
-1. You should not use slippers in project, the syntax are not stable yet, it's just a experiment for now.
+1. You should not use slippers in projects, the syntax are not stable yet, it's just an experiment for now.
 1. It's welcome to let me know your idea on [issue pages](https://github.com/guileen/slippers/issues).
