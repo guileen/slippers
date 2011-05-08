@@ -5,30 +5,30 @@ db = mongo.db('...');
 
 db.open();//{
 
-function getBooks(options, callback){
-  var err, book = db.collection('book');//{
-  if(err) return callback(err);
-  var err, cursor = book.find();//{
-  if(err) return callback(err);
-  var err, books = cursor.toArray();//{
-  if(err) return callback(err);
+function getBooks(options){//{
+  var book = db.collection('book');//{
+  var cursor = book.find();//{
+  var books = cursor.toArray();//{
   doSomething(books);
-  callback(null, books);
+  return books;//{
 }
 
-function multiLevels(){
-  var err, data, books;
+function multiLevels(){//{
+  var data, books;
   if(yes){
-    err, data = fs.readFile('filename', 'utf-8');//{
-    if(!err){
-      err, books = db.collection('book');//{
+    data = fs.readFile('filename', 'utf-8');//{
+    if(ok){
+      books = db.collection('book');//{
+      return books;//{
     }
   }else{
-    err, data = fs.readFile('filename', 'utf-8');//{
-    if(!err){
-      err, books = db.collection('book');//{
+    data = fs.readFile('filename', 'utf-8');//{
+    if(ok){
+      books = db.collection('book');//{
+      return books;//{
     }
   }
+  return books;//this is wrong, out of indent;
 }
 
 console.log('inside open');

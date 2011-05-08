@@ -59,20 +59,21 @@ function compile(codes){
           cb_args = m[4],
           foo = m[5],
           args = m[6],
-          cb = ( args && ',' ) + ' function(';
+          cb = ( args && ',' ) + ' function(__err' + (assignment && ',' || ''),
+          errHandler = '){if(__err)return __cb(__err);';
 
       if(assignment){
         if(local){
           cb += cb_args;
-          cb += '){';
+          cb += errHandler;
         } else {
           cb += cb_args.replace(/[^\s,]+/g, '__$&');
-          cb += '){';
+          cb += errHandler;
           cb += cb_args.replace(/[^\s,]+/g, '$&=__$&');
           cb += ';';
         }
       }else{
-        cb +='){';
+        cb += errHandler;
       }
       results.push( indent + foo + args + cb);
     }
