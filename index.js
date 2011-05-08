@@ -15,7 +15,7 @@
  (\)\s*;?)              // )
  \s*\/\/\{\s*$/         // //{
 */
-var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)(\s*\)\s*;?)\s*\/\/\{/,
+var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)\b_\b\s*\);?(.*)/,
     ex_fn     =  /^(.*[\s=:&|]?function\s[^\(]*?\(\s*)([^\)]*)(\s*\)\s*\{)\s*\/\/\{/,
     ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
 
@@ -56,15 +56,16 @@ function compile(codes){
           cb_args = m[4],
           foo = m[5],
           args = m[6],
-          cb = ( args && ',' ) + ' function(__err' + (assignment && ',' || ''),
+          tail = m[7],
+          cb = 'function(__err' + (assignment && ', ' || ''),
           errHandler = '){if(__err)return __cb(__err);';
 
       if(assignment){
         if(local){
-          cb += cb_args;
+          cb += cb_args.trim();
           cb += errHandler;
         } else {
-          cb += cb_args.replace(/[^\s,]+/g, '__$&');
+          cb += cb_args.replace(/[^\s,]+/g, '__$&').trim();
           cb += errHandler;
           cb += cb_args.replace(/[^\s,]+/g, '$&=__$&');
           cb += ';';
@@ -72,7 +73,7 @@ function compile(codes){
       }else{
         cb += errHandler;
       }
-      results.push( indent + foo + args + cb);
+      results.push( indent + foo + args + cb + tail);
     }
     return !!m;
   }

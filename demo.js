@@ -3,12 +3,12 @@ var mongo = require('mongodb')
 
 db = mongo.db('...');
 
-db.open();//{
+db.open(_);
 
 function getBooks(options){//{
-  var book = db.collection('book');//{
-  var cursor = book.find();//{
-  var books = cursor.toArray();//{
+  var book = db.collection('book', _);
+  var cursor = book.find(_);
+  var books = cursor.toArray(_);
   doSomething(books);
   return books;//{
 }
@@ -16,15 +16,15 @@ function getBooks(options){//{
 function multiLevels(){//{
   var data, books;
   if(yes){
-    data = fs.readFile('filename', 'utf-8');//{
+    data = fs.readFile('filename', 'utf-8', _);
     if(ok){
-      books = db.collection('book');//{
+      books = db.collection('book', _);
       return books;//{
     }
   }else{
-    data = fs.readFile('filename', 'utf-8');//{
+    data = fs.readFile('filename', 'utf-8', _);
     if(ok){
-      books = db.collection('book');//{
+      books = db.collection('book', _);
       return books;//{
     }
   }
