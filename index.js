@@ -7,8 +7,9 @@
  * close ONE block in ONE line, e.g. ` });});` is wrong , `}}` is wrong.
  */
 var ex_async  = /^(\s*)((var\s)?([^=]+)=\s*)?(.*\(\s*)([^\)]*)\b_\b\s*\);?(.*)/,
-    ex_fn     = /^(.*[\s=:&|]?function(?:\s[^\(]*|)\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
-    ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(;?)\s*\/\/\{$/;
+    ex_fn     = /^(.*[\(\s=:&|]?function(?:\s[^\(]*|)\(\s*)([^\)]*)\b_\b(\s*\)\s*\{.*)/,
+    ex_nor_fn = /^.*[\(\s=:&|]?function(?:\s[^\(]*|)\(\s*[^\)]*\)\s*\{.*/,
+    ex_return = /^(.*[\s\{&|])?return\s+([^;]*)(.*)/;
 
 function getDeltaBlocks(line){
   var close=false,levels = 0;
@@ -35,6 +36,7 @@ function compile(codes){
       blocks = [],
       block_level = 0,
       results = [],
+      in_async = true,
       line, deltaBlocks, block_level, last_block_level, block;
 
   function parse_async(){
@@ -87,23 +89,27 @@ function compile(codes){
   function parse_fn(){
     var m = ex_fn.exec(line);
     if(m){
+      in_async = true;
       var prefix = m[1],
           args = m[2].trim(),
           suffix = m[3];
       results.push(prefix + args + (args && ' ') + '__cb' + suffix);
+    } else if(ex_nor_fn.test(line)){
+      in_async = false;
     }
     return !!m;
   }
 
   function parse_return(){
     var m = ex_return.exec(line);
-    if(m){
+    if(m && in_async){
       var prefix = m[1],
           cb_args = m[2],
           suffix = m[3];
       results.push((prefix || '') + '__cb(null' + (cb_args && ',') + cb_args + ')' + suffix);
+      return true;
     }
-    return !!m;
+    return false;
   }
 
   for(; i< len; i++){

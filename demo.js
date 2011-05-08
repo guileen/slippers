@@ -10,7 +10,7 @@ function getBooks(options, _){
   var cursor = book.find(_);
   var books = cursor.toArray(_);
   doSomething(books);
-  return books;//{
+  return books;
 }
 
 var multiLevels = function(_){
@@ -19,13 +19,16 @@ var multiLevels = function(_){
     data = fs.readFile('filename', 'utf-8', _);
     if(ok){
       books = db.collection('book', _);
-      return books;//{
+      return books;
     }
   }else{
+    var testInner = (function(){
+        return 0;
+    })();
     data = fs.readFile('filename', 'utf-8', _);
     if(ok){
       books = db.collection('book', _);
-      return books;//{
+      return books;
     }
   }
   return books;//this is wrong, out of indent;

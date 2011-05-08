@@ -22,10 +22,13 @@ var multiLevels = function(__cb){
       __cb(null,books);
     });}
   });}else{
+    var testInner = (function(){
+        return 0;
+    })();
     fs.readFile('filename', 'utf-8', function(__err, __data){if(__err)return __cb(__err);data=__data ;
     if(ok){
       db.collection('book', function(__err, __books){if(__err)return __cb(__err);books=__books ;
-      __cb(null,books);
+      return books;
     });}
   });}
   return books;//this is wrong, out of indent;
