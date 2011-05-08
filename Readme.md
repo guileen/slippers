@@ -17,14 +17,14 @@ run `npm install slippers`
 edit test.js
 
 ```javascript
-var err, data = fs.readFile(filename, 'utf-8');//{
+var data = fs.readFile(filename, 'utf-8');//{
 console.log(data);
 ```
 
 run `slippers test.js`
 
 ```javascript
-fs.readFile(filename, 'utf-8', function(err, data ){
+var __cb=global.__cb || function(e){console.log(e)};fs.readFile(filename, 'utf-8', function(__err,data ){if(__err)return __cb(__err);
 console.log(data);
 });
 ```
