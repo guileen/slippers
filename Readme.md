@@ -7,7 +7,7 @@ Slippers is inspired by [streamlinejs](https://github.com/Sage/streamlinejs) and
 If you really need this feature,
 please try [streamlinejs](https://github.com/Sage/streamlinejs) or [Jscex](https://github.com/JeffreyZhao/jscex)
 
-You just need end with a `//{` on the async call, you can got the magic.
+You just need end with a `_` in the async call, you can got the magic.
 
 Usage
 ========
@@ -17,7 +17,7 @@ run `npm install slippers`
 edit test.js
 
 ```javascript
-var data = fs.readFile(filename, 'utf-8');//{
+var data = fs.readFile(filename, 'utf-8', _);
 console.log(data);
 ```
 
@@ -31,7 +31,7 @@ console.log(data);
 
 You can use `//}` for manually end up the async block if you want.
 
-**See [demo.js](https://github.com/guileen/slippers/blob/master/demo.js) for more information.**
+**See [demo.js](https://github.com/guileen/slippers/blob/master/demo.js) and [demo.out.js](https://github.com/guileen/slippers/blob/master/demo.out.js) for more information.**
 
 Map line-num for debug?
 --------
