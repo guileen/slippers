@@ -24,14 +24,67 @@ console.log(data);
 run `slippers test.js`
 
 ```javascript
-var __cb=global.__cb || function(e){console.log(e)};fs.readFile(filename, 'utf-8', function(__err,data ){if(__err)return __cb(__err);
+var cb=global.cb || function(e){console.log(e)};fs.readFile(filename, 'utf-8', function(err,data ){if(err)return cb(err);
 console.log(data);
 });
 ```
 
-You can use `//}` for manually end up the async block if you want.
-
 **See [demo.js](https://github.com/guileen/slippers/blob/master/demo.js) and [demo.out.js](https://github.com/guileen/slippers/blob/master/demo.out.js) for more information.**
+
+function define
+--------
+
+```javascript
+function foo(args, _){
+  return bar1, bar2;
+}
+// compile to =>
+function foo(args, callback){
+  callback(null, bar1, bar2);
+}
+```
+
+parallel
+--------
+
+```javascript
+var bar1, bar2, bar3, bar4;
+parallel{
+  bar1, bar2 = foo(args, _);
+  bar3, bar4 = foo(args, _);
+}
+console.log(bar1 + bar2 + bar3 + bar4);
+// compile to =>
+var bar1, bar2, bar3, bar4;
+(function(cb){
+  function update(){
+    if(--count==0) cb()
+  }
+
+  var count=2;
+
+  foo(args, function(err, __bar1, __bar2){
+    if(err)return cb(err);
+    bar1=__bar1, bar2=__bar2;
+    update();
+  });
+
+  foo(args, function(err, __bar3, __bar4){
+    if(err)return cb(err);
+    bar3=__bar3, bar4=__bar4;
+    update();
+  });
+
+})(function(err){
+
+  if(err)return cb(err);
+  console.log(bar1 + bar2 + bar3 + bar4);
+
+});
+
+```
+
+You can use `//}` for manually end up the async block if you want.
 
 Map line-num for debug?
 --------
