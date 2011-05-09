@@ -29,7 +29,7 @@ console.log(data);
 });
 ```
 
-**See [demo.js](https://github.com/guileen/slippers/blob/master/demo.js) and [demo.out.js](https://github.com/guileen/slippers/blob/master/demo.out.js) for more information.**
+**See [demo.js](https://github.com/guileen/slippers/blob/master/demos/demo.js) and [demo.out.js](https://github.com/guileen/slippers/blob/master/demos/demo.out.js) for more information.**
 
 function define
 --------
