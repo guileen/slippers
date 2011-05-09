@@ -1,4 +1,4 @@
-var __cb = global.__cb || function(e) {
+var cb = global.cb || function(e) {
     console.log(e);
 };
 
@@ -6,26 +6,37 @@ var express = require("express"), mongo = require("mongodb"), db = mongo.db("...
 
 app = express.createServer();
 
-db.open(function(__err) {
-    if (__err) return __cb(__err);
-    db.collection("book", function(__err, __book) {
-        if (__err) return __cb(__err);
-        book = __book;
-        db.collection("user", function(__err, __user) {
-            if (__err) return __cb(__err);
+db.open(function(err) {
+    if (err) return cb(err);
+    var book, user;
+    (function(cb) {
+        function update() {
+            if (--count == 0) cb();
+        }
+        var count = 2;
+        db.collection("book", function(err, __book) {
+            if (err) return cb(err);
+            book = __book;
+            update();
+        });
+        db.collection("user", function(err, user) {
+            if (err) return cb(err);
             user = __user;
-            app.get("/", function(req, res) {
-                book.find(function(__err, cursor) {
-                    if (__err) return __cb(__err);
-                    cursor.toArray(function(__err, items) {
-                        if (__err) return __cb(__err);
-                        res.render("book", {
-                            items: items
-                        });
+            update();
+        });
+    })(function(err) {
+        if (err) return cb(err);
+        app.get("/", function(req, res) {
+            book.find(function(err, cursor) {
+                if (err) return cb(err);
+                cursor.toArray(function(err, items) {
+                    if (err) return cb(err);
+                    res.render("book", {
+                        items: items
                     });
                 });
             });
-            app.listen();
         });
+        app.listen();
     });
 });
