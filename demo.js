@@ -34,9 +34,21 @@ var multiLevels = function(_){
   return books;//this is wrong, out of indent;
 }
 
+function testParallel(_){
+  var user, book;
+  parallel{
+    user = db.collection('user', _);
+    init(user);
+    book = db.collection('book', _);
+    init(book);
+  }
+  return  user, book;
+}
+
 console.log('inside open');
 
+var books = getBooks({}, _);
 //}
-
 console.log('outside open');
+//}
 console.log('start app');

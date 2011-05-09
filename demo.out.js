@@ -34,10 +34,22 @@ var multiLevels = function(__cb){
   __cb(null,books);//this is wrong, out of indent;
 }
 
+function testParallel(__cb){
+  var user, book;
+  (function(__cb){function __update(){if(--__count==0)__cb()}var __count=2;
+    db.collection('user', function(__err, __user){if(__err)return __cb(__err);user=__user ;
+    init(user);__update();
+    });db.collection('book', function(__err, __book){if(__err)return __cb(__err);book=__book ;
+    init(book);__update();
+  });})(function(__err){if(__err)return __cb(__err);
+  __cb(null,user, book);
+});}
+
 console.log('inside open');
 
+getBooks({}, function(__err, books){if(__err)return __cb(__err);
 });//}
-
 console.log('outside open');
+});//}
 console.log('start app');
 
